@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.io.DataInput;
+
 @Service
 public class PackageStatusListener {
 
@@ -17,17 +19,13 @@ public class PackageStatusListener {
         this.packageRepository = packageRepository;
     }
 
-    @KafkaListener(topics = "package-status-update", groupId = "package-group")
-    public void listenPackageStatusUpdates(String packageId, String updatedPackage) {
+    @KafkaListener(topics = "package-status-updatee", groupId = "package-group")
+    public void listenPackageStatusUpdates(String message) throws JsonProcessingException {
         // Actualizar el estado del paquete en la base de datos
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            Pack pack = mapper.readValue(updatedPackage, Pack.class);
-            //packageRepository.save(updatedPackage);
-            System.out.println("package: " + pack.toString());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        Pack pack = mapper.readValue(message, Pack.class);
+        //packageRepository.save(updatedPackage);
+        System.out.println("package: " + pack.toString());
 
     }
 }
