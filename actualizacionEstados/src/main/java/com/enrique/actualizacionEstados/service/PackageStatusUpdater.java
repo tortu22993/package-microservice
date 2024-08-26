@@ -24,21 +24,20 @@ public class PackageStatusUpdater {
     private final PackageRepository packageRepository;
 
 
-
     public void updateStatus() {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-         for (Pack pkg : packageRepository.findAll()) {
-             if (isModified(pkg)) {
-                 try {
-                     String packJson = objectMapper.writeValueAsString(pkg);
-                     kafkaTemplate.send("package-status-updatee", packJson);
-                 } catch (JsonProcessingException e) {
-                     e.printStackTrace();
-                 }
-             }
-         }
+        for (Pack pkg : packageRepository.findAll()) {
+            if (isModified(pkg)) {
+                try {
+                    String packJson = objectMapper.writeValueAsString(pkg);
+                    kafkaTemplate.send("package-status-updatee", packJson);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         System.out.println("Updated package statuses");
     }
@@ -54,3 +53,4 @@ public class PackageStatusUpdater {
         }
 
     }
+}
