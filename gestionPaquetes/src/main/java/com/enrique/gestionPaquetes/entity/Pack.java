@@ -28,4 +28,7 @@ public class Pack {
 
     @Column(name = "status", nullable = false)
     private String status;
+
+    @Column(name = "dataHash", nullable = true)
+    private String dataHash;
 }

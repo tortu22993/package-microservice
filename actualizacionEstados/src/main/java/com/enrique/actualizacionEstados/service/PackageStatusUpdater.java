@@ -3,6 +3,7 @@ package com.enrique.actualizacionEstados.service;
 
 import com.enrique.actualizacionEstados.entity.Pack;
 import com.enrique.actualizacionEstados.repository.PackageRepository;
+import com.enrique.actualizacionEstados.utils.HashUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.security.NoSuchAlgorithmException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,26 +26,31 @@ public class PackageStatusUpdater {
 
 
     public void updateStatus() {
-        Pack pkg = new Pack("1","primer paquete","Completado");
-        ObjectMapper objectMapper = new ObjectMapper();
-        /*Message<Pack> message = MessageBuilder
-                .withPayload(pkg)
-                .setHeader(KafkaHeaders.TOPIC, "package-status-update")
-                .build();
-        /* for (Pack pkg : packageRepository.findAll()) {
 
-            if ("pending".equals(pkg.getStatus())) {
-                pkg.setStatus("in transit");
-            } else if ("in transit".equals(pkg.getStatus())) {
-                pkg.setStatus("delivered");
-            }*/
-        try {
-            String packJson = objectMapper.writeValueAsString(pkg);
-            kafkaTemplate.send("package-status-updatee", packJson);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        //}
+        ObjectMapper objectMapper = new ObjectMapper();
+
+         for (Pack pkg : packageRepository.findAll()) {
+             if (isModified(pkg)) {
+                 try {
+                     String packJson = objectMapper.writeValueAsString(pkg);
+                     kafkaTemplate.send("package-status-updatee", packJson);
+                 } catch (JsonProcessingException e) {
+                     e.printStackTrace();
+                 }
+             }
+         }
+
         System.out.println("Updated package statuses");
     }
-}
+
+    private boolean isModified(Pack pack) {
+        // Compara el hash almacenado con el nuevo hash calculado
+        try {
+            String currentHash = HashUtils.calculateHash(pack);
+            return !currentHash.equals(pack.getDataHash());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
