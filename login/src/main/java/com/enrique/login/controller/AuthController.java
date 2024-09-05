@@ -28,13 +28,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
+        String token = "";
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        if(authentication.isAuthenticated()){
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = tokenProvider.generateToken(authentication.getName());
+            token = tokenProvider.generateToken(authentication.getName());
+        }else{
+
+        }
 
         return ResponseEntity.ok(new AuthResponse(token));
     }

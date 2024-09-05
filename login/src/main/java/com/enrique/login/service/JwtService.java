@@ -3,7 +3,7 @@ package com.enrique.login.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +13,10 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-    //@Value("${jwt.secret}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
-    //@Value("${jwt.expiration}")
+    @Value("${jwt.expiration}")
     private long jwtExpirationInMs;
 
     public String generateToken(String username) {
@@ -35,7 +35,7 @@ public class JwtService {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    public boolean validateToken(String authToken) {
+    public boolean validateToken(final String authToken) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
             return true;
