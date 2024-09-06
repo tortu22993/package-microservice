@@ -38,7 +38,7 @@ public class AuthController {
         if(authentication.isAuthenticated()){
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            token = tokenProvider.generateToken(authentication.getName());
+            token = tokenProvider.generateToken(authentication);
         }else{
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("Credenciales incorrectas"));

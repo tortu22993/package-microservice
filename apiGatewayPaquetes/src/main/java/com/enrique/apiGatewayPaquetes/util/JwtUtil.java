@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 @Component
@@ -29,8 +30,11 @@ public class JwtUtil {
         }
     }
 
-    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        return claimsResolver.apply(claims);
+    public List<String> getRolesFromToken(final String authToken) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(authToken)
+                .getBody();
+        return (List<String>) claims.get("roles");
     }
 }
