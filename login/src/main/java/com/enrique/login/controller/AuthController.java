@@ -4,6 +4,8 @@ package com.enrique.login.controller;
 import com.enrique.login.entity.request.AuthRequest;
 import com.enrique.login.entity.request.AuthResponse;
 import com.enrique.login.service.JwtService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +40,8 @@ public class AuthController {
 
             token = tokenProvider.generateToken(authentication.getName());
         }else{
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("Credenciales incorrectas"));
 
         }
 
