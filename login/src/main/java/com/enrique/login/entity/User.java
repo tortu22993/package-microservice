@@ -21,6 +21,6 @@ public class User {
     private String username;
     private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+
     private String roles;
 }

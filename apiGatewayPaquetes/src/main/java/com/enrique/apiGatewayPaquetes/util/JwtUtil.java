@@ -30,11 +30,12 @@ public class JwtUtil {
         }
     }
 
-    public List<String> getRolesFromToken(final String authToken) {
+    public String getRolesFromToken(final String authToken) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(authToken)
                 .getBody();
-        return (List<String>) claims.get("roles");
+        return claims.get("roles").toString();
     }
+
 }

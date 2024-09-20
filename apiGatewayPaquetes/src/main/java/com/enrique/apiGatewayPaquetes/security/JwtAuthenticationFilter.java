@@ -32,9 +32,11 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
     @Override
     public GatewayFilter apply(Config config) {
+
         return ((exchange, chain) -> {
-        if(validator.isSecured.test(exchange.getRequest())){
-            //header contiene token
+            System.out.println("Request URI: " + exchange.getRequest().getURI().getPath());
+
+            if(validator.isSecured.test(exchange.getRequest())){
             if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)){
                 throw new RuntimeException("Missing authorization header");
             }
@@ -49,7 +51,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 //REST llam al servicio
                // restTemplate.getForObject("http://LOGIN//validate?token"+authHeader, String.class);
                 jwtUtil.validateToken(authHeader);
-                List<String> roles = jwtUtil.getRolesFromToken(authHeader.substring(7));
+                String roles = jwtUtil.getRolesFromToken(authHeader);
                 exchange.getAttributes().put("roles", roles);
             }catch (Exception e){
                 System.out.println("Error validating token");
