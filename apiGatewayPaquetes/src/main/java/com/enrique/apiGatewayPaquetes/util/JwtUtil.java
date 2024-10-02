@@ -30,12 +30,14 @@ public class JwtUtil {
         }
     }
 
-    public String getRolesFromToken(final String authToken) {
+    public  List<String> getRolesFromToken(final String authToken) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(authToken)
                 .getBody();
-        return claims.get("roles").toString();
+
+        // Asegúrate de que los roles estén guardados como una lista
+        return (List<String>) claims.get("roles");
     }
 
 }

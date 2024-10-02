@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.RouteMatcher;
 import org.springframework.web.client.RestTemplate;
@@ -51,8 +52,13 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 //REST llam al servicio
                // restTemplate.getForObject("http://LOGIN//validate?token"+authHeader, String.class);
                 jwtUtil.validateToken(authHeader);
-                String roles = jwtUtil.getRolesFromToken(authHeader);
-                exchange.getAttributes().put("roles", roles);
+                List<String> roles = jwtUtil.getRolesFromToken(authHeader);
+                //exchange.getAttributes().put("roles", roles);
+                // En el API Gateway
+                exchange.getRequest().mutate()
+                        .header("X-Roles", String.join(",", roles))  // O cualquier formato que necesites
+                        .build();
+
             }catch (Exception e){
                 System.out.println("Error validating token");
                 throw new RuntimeException("Error validating token");
