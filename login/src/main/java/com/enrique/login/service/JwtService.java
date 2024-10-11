@@ -1,62 +1,36 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.enrique.login.service;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.UrlJwkProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Component;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.net.URL;
 
-@Component
+/**
+ *
+ * @author sotobotero
+ */
+@Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+    @Value("${keycloak.jwk-set-uri}")
+    private String jwksUrl;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpirationInMs;
+    @Value("${keycloak.certs-id}")
+    private String certsId;
 
-    public String generateToken(Authentication authentication) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)  // Asegúrate de usar GrantedAuthority
-                .collect(Collectors.toList());
-
-
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .claim("roles", roles)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, secretKey)
-                .compact();
-    }
-
-    public String getUsernameFromJWT(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
-    }
-
-    public boolean validateToken(final String authToken) {
-        try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        return claimsResolver.apply(claims);
+    @Cacheable(value = "jwkCache")
+    public Jwk getJwk() throws Exception {
+        URL url = new URL(jwksUrl);
+        UrlJwkProvider urlJwkProvider = new UrlJwkProvider(url);
+       Jwk get = urlJwkProvider.get(certsId.trim());  
+        return get;
     }
 }
+
